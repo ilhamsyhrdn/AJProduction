@@ -1,11 +1,15 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+// Do not throw at module import time — that prevents builds when envs are not yet set.
+// We delay runtime errors to the actual connection attempt inside `dbConnect()`.
+const MONGODB_URI = process.env.MONGODB_URI || '';
 
 if (!MONGODB_URI) {
-  throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
-  );
+  // friendly warning for build logs — actual connection will fail later if attempted
+  // (we avoid throwing here so Vercel / CI can complete the build even before secrets
+  //  are provided; the app will still require the env to function at runtime)
+  // eslint-disable-next-line no-console
+  console.warn('Warning: MONGODB_URI not set. Database connections will fail at runtime if used.');
 }
 
 /**
@@ -27,6 +31,10 @@ if (!cached) {
 async function dbConnect(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;
+  }
+
+  if (!MONGODB_URI) {
+    throw new Error('Missing MONGODB_URI environment variable at runtime. Set MONGODB_URI in your environment.');
   }
 
   if (!cached.promise) {
