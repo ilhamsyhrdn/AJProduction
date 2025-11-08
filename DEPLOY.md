@@ -185,8 +185,19 @@ node scripts/set-admin.js your-google-email@gmail.com
 ## Step 11: Access Admin Panel
 1. Visit `https://your-site.vercel.app/admin/login`
 2. Email: `AJProduct@admin`
-3. Password: `AJ1964`
+3. Password: [REDACTED] — DO NOT store plaintext passwords in repo or docs. Rotate immediately.
 4. Should see dashboard ✅
+
+## Security notice — rotate leaked secrets
+
+If you've ever pasted secrets (DB password, OAuth client secret, NEXTAUTH_SECRET) into public places (chat, issues, commits), treat them as compromised and rotate them immediately:
+
+- Rotate Google OAuth client secret in Google Cloud Console (create new secret and delete old one).
+- Change your MongoDB user password in Atlas and update `MONGODB_URI` in Vercel.
+- Generate a new `NEXTAUTH_SECRET` and set it in Vercel (do not commit it).
+- Remove any plaintext secrets from repo and consider using a secret-scanning tool or `git filter-repo` to remove them from history if necessary.
+
+For convenience, there's a helper script in `scripts/add-vercel-env.ps1` you can run locally to add production envs to Vercel interactively without exposing secrets in code or chat.
 
 ---
 
