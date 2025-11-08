@@ -111,6 +111,58 @@ Go back to Vercel Dashboard:
    ```
 5. **Save**
 
+## Troubleshooting: Error "redirect_uri_mismatch" (detail & perbaikan)
+
+Jika Anda melihat error "Error 400: redirect_uri_mismatch" saat mencoba login Google, ikuti langkah ringkas berikut untuk memperbaikinya.
+
+1) Temukan redirect_uri yang dikirim aplikasi (opsional)
+   - Saat muncul error, salin parameter `redirect_uri` dari address bar URL Google (atau buka DevTools → Network untuk melihat request ke accounts.google.com).
+
+2) Tambahkan exact redirect URI di Google Cloud Console
+   - Buka: APIs & Services → Credentials → pilih OAuth Client → Edit → Authorized redirect URIs
+   - Tambahkan persis salah satu dari URI berikut (pilih sesuai lingkungan):
+     - Lokal (default `.env.local` di repo):
+       ```
+       http://localhost:3001/api/auth/callback/google
+       ```
+     - Produksi (ganti dengan URL Vercel Anda):
+       ```
+       https://<your-vercel-url>.vercel.app/api/auth/callback/google
+       ```
+     - Jika Anda ingin support Preview Deploys, tambahkan preview URL(s) juga (contoh):
+       ```
+       https://vercel-preview-url.vercel.app/api/auth/callback/google
+       ```
+
+3) Pastikan `NEXTAUTH_URL` di Vercel sesuai
+   - Di Vercel: Project → Settings → Environment Variables → tambahkan/cek:
+     - `NEXTAUTH_URL` = `https://<your-vercel-url>.vercel.app`
+     - `NEXT_PUBLIC_API_URL` = `https://<your-vercel-url>.vercel.app`
+   - Setelah update, redeploy project.
+
+4) Periksa `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET`
+   - Pastikan nilai yang Anda isi di Vercel berasal dari OAuth Client yang sama di Google Cloud Console.
+
+5) Tes ulang
+   - Gunakan mode incognito untuk menghindari session lama.
+
+Commands cepat (PowerShell) — jalankan di mesin Anda (tidak mengandung secrets):
+```powershell
+# install/vercel login
+npm i -g vercel
+# login (akan buka browser)
+vercel login
+# lihat env di project (harus linked / login)
+vercel env ls
+# tambahkan NEXTAUTH_URL (ganti URL dengan milik Anda)
+vercel env add NEXTAUTH_URL "https://<your-vercel-url>.vercel.app" production
+vercel env add NEXT_PUBLIC_API_URL "https://<your-vercel-url>.vercel.app" production
+```
+
+Catatan keamanan: jangan menempelkan `GOOGLE_CLIENT_SECRET` atau `NEXTAUTH_SECRET` ke tempat publik. Simpan di password manager.
+
+Jika Anda mau, jalankan skrip helper di repo untuk mem-print redirect URI yang harus Anda tambahkan (lihat `scripts/print-callbacks.ps1`).
+
 ## Step 9: Test Your Site
 1. Visit `https://aj-product-xxxxx.vercel.app`
 2. Should see homepage ✅
